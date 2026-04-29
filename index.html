@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 NIL Activation Calendar — Campus Ink</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,800;0,900;1,800&family=DM+Mono:wght@400;500&family=Unbounded:wght@400;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg:#07090f; --bg2:#0d1120; --bg3:#131929;
+  --gold:#f5c842;
+  --bb:#ef4444; --sb:#f472b6; --ml:#3b82f6; --wl:#a855f7;
+  --green:#22c55e; --green2:rgba(34,197,94,.12);
+  --text:#eef2f7; --muted:#6b7a90;
+  --border:rgba(255,255,255,.07);
+  --card:rgba(255,255,255,.03); --hover:rgba(255,255,255,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;min-height:100vh;overflow-x:hidden}
+.hdr{position:relative;padding:44px 48px 32px;border-bottom:1px solid var(--border);overflow:hidden}
+.hdr::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 100% at 95% -5%,rgba(245,200,66,.09) 0%,transparent 55%),radial-gradient(ellipse 50% 60% at 0% 110%,rgba(59,130,246,.06) 0%,transparent 50%);pointer-events:none}
+.hdr-row{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:20px;position:relative;z-index:1}
+.brand{font-family:'Unbounded',sans-serif;font-size:10px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.brand::before{content:'';display:inline-block;width:18px;height:2px;background:var(--gold)}
+.hed{font-family:'Barlow Condensed',sans-serif;font-size:clamp(40px,5.5vw,72px);font-weight:900;line-height:.9;text-transform:uppercase;letter-spacing:-.02em}
+.hed em{font-style:italic;color:var(--gold)}
+.stat-strip{display:flex;gap:1px}
+.stat-box{padding:14px 18px;background:rgba(255,255,255,.03);border:1px solid var(--border);text-align:center;transition:background .2s}
+.stat-box:first-child{border-radius:8px 0 0 8px}
+.stat-box:last-child{border-radius:0 8px 8px 0;border-left:none}
+.sv{font-family:'Unbounded',sans-serif;font-size:19px;font-weight:900;color:var(--gold);display:block}
+.sv.green{color:var(--green)}
+.sl{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:3px;display:block}
+.nav{display:flex;gap:0;border-bottom:1px solid var(--border);padding:0 48px;overflow-x:auto}
+.ntab{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:14px 22px;border:none;background:transparent;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap}
+.ntab:hover{color:var(--text)}
+.ntab.on{color:var(--gold);border-bottom-color:var(--gold)}
+.pg{display:none}
+.pg.on{display:block}
+.roster-controls{display:flex;align-items:center;gap:12px;padding:20px 48px 0;flex-wrap:wrap}
+.search-box{flex:1;min-width:200px;max-width:320px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:9px 14px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;outline:none;transition:border-color .15s}
+.search-box::placeholder{color:var(--muted)}
+.search-box:focus{border-color:rgba(255,255,255,.2)}
+.filter-btns{display:flex;gap:4px;flex-wrap:wrap}
+.fbtn{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:7px 14px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--muted);cursor:pointer;transition:all .15s}
+.fbtn:hover{color:var(--text);border-color:rgba(255,255,255,.2)}
+.fbtn.on{color:#fff;border-color:transparent}
+.fbtn.all.on{background:rgba(255,255,255,.12)}
+.fbtn.bb.on{background:var(--bb)}
+.fbtn.sb.on{background:var(--sb)}
+.fbtn.ml.on{background:var(--ml)}
+.fbtn.wl.on{background:var(--wl)}
+.reset-btn{margin-left:auto;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:7px 14px;border:1px solid rgba(239,68,68,.3);border-radius:6px;background:transparent;color:rgba(239,68,68,.7);cursor:pointer;transition:all .15s}
+.reset-btn:hover{background:rgba(239,68,68,.1);color:#ef4444}
+.lanes{display:grid;grid-template-columns:1fr 1fr;gap:0;padding:20px 48px 48px}
+.lane{border:1px solid var(--border);border-radius:12px;overflow:hidden;min-height:300px}
+.lane+.lane{margin-left:12px}
+.lane-hdr{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:2;backdrop-filter:blur(8px)}
+.lane-hdr.inactive{background:rgba(13,17,32,.95)}
+.lane-hdr.active{background:rgba(10,20,14,.95);border-bottom-color:rgba(34,197,94,.2)}
+.lane-icon{font-size:14px}
+.lane-title{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:900;text-transform:uppercase;letter-spacing:.08em}
+.lane-hdr.active .lane-title{color:var(--green)}
+.lane-count{font-family:'Unbounded',sans-serif;font-size:11px;font-weight:700;margin-left:auto;padding:3px 9px;border-radius:20px}
+.lane-hdr.inactive .lane-count{background:rgba(255,255,255,.07);color:var(--muted)}
+.lane-hdr.active .lane-count{background:rgba(34,197,94,.15);color:var(--green)}
+.lane-body{padding:10px;display:flex;flex-direction:column;gap:6px}
+.lane-empty{padding:24px 16px;text-align:center;font-size:11px;color:var(--muted);font-style:italic}
+.ac{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:13px 14px;cursor:pointer;transition:all .15s;position:relative;border-left:3px solid transparent;display:flex;align-items:center;gap:12px;user-select:none}
+.ac:hover{background:var(--bg3);border-color:rgba(255,255,255,.13);transform:translateX(2px)}
+.ac.bb{border-left-color:var(--bb)}.ac.sb{border-left-color:var(--sb)}.ac.ml{border-left-color:var(--ml)}.ac.wl{border-left-color:var(--wl)}
+.ac.activated{background:rgba(14,26,16,.9);border-color:rgba(34,197,94,.2)}
+.ac.activated.bb{border-left-color:var(--bb)}.ac.activated.sb{border-left-color:var(--sb)}.ac.activated.ml{border-left-color:var(--ml)}.ac.activated.wl{border-left-color:var(--wl)}
+.ac-info{flex:1;min-width:0}
+.ac-name{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;text-transform:uppercase;line-height:1;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ac-sub{font-size:9px;color:var(--muted);line-height:1.4}
+.ac-stat{font-size:9px;color:var(--gold);margin-top:3px}
+.ac-toggle{flex-shrink:0;width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .15s;cursor:pointer}
+.ac:hover .ac-toggle{border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.1)}
+.ac.activated .ac-toggle{background:rgba(34,197,94,.15);border-color:rgba(34,197,94,.4);color:var(--green)}
+.ac-sport-pip{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:1px}
+.sport-divider{padding:6px 4px 4px;font-family:'Unbounded',sans-serif;font-size:8px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:8px;margin-top:6px}
+.sport-divider:first-child{margin-top:0}
+.sport-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.cal-ctrl{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:20px 48px 16px}
+.mtabs{display:flex;gap:4px}
+.mtab{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:8px 18px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--muted);cursor:pointer;transition:all .15s}
+.mtab:hover{color:var(--text);border-color:rgba(255,255,255,.18)}
+.mtab.on{background:var(--gold);color:var(--bg);border-color:var(--gold)}
+.legend{display:flex;gap:14px;flex-wrap:wrap}
+.leg{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted)}
+.lpip{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.cal-body{padding:0 48px 48px}
+.mpanel{display:none}.mpanel.on{display:block}
+.wk{margin-bottom:22px}
+.wk-lbl{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.days{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+.dc{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;cursor:default;position:relative;overflow:hidden;transition:all .18s}
+.dc.clickable{cursor:pointer}
+.dc.clickable:hover{background:var(--hover);border-color:rgba(255,255,255,.14);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.dc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:8px 8px 0 0}
+.dc.bb::before{background:var(--bb)}.dc.sb::before{background:var(--sb)}.dc.ml::before{background:var(--ml)}.dc.wl::before{background:var(--wl)}.dc.special::before{background:var(--gold)}.dc.multi::before{background:linear-gradient(90deg,var(--bb) 0%,var(--sb) 33%,var(--ml) 66%,var(--wl) 100%)}
+.dc-top{display:flex;justify-content:space-between;margin-bottom:6px}
+.dc-day{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--muted)}
+.dc-date{font-size:9px;color:var(--muted);opacity:.5}
+.dc-tag{display:inline-block;font-family:'Unbounded',sans-serif;font-size:7.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 5px;border-radius:3px;margin-bottom:5px}
+.dc-tag.bb{background:rgba(239,68,68,.18);color:#fca5a5}.dc-tag.sb{background:rgba(244,114,182,.18);color:#fbcfe8}.dc-tag.ml{background:rgba(59,130,246,.18);color:#93c5fd}.dc-tag.wl{background:rgba(168,85,247,.18);color:#d8b4fe}.dc-tag.special,.dc-tag.multi{background:rgba(245,200,66,.22);color:var(--gold)}
+.dc-ath{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;text-transform:uppercase;line-height:1;margin-bottom:4px}
+.dc-theme{font-size:10px;color:var(--muted);line-height:1.4;margin-bottom:4px}
+.dc-merch{font-size:10px;color:var(--gold);line-height:1.3}
+.dc-rev{font-size:9px;color:rgba(245,200,66,.45);margin-top:3px}
+.rev-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1px;background:var(--border);margin:0 48px 32px;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.rt{background:var(--bg2);padding:22px}
+.rt-lbl{font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.rt-val{font-family:'Unbounded',sans-serif;font-size:24px;font-weight:900;line-height:1}
+.rt-sub{font-size:10px;color:var(--muted);margin-top:6px;line-height:1.5}
+.rev-bars{padding:0 48px 48px}
+.arw{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.arn{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;text-transform:uppercase;min-width:180px;color:var(--text);display:flex;align-items:center;gap:6px}
+.arn-pip{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.arb-wrap{flex:1;height:7px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden}
+.arb{height:100%;border-radius:4px;transition:width 1.1s cubic-bezier(.22,1,.36,1)}
+.arv{font-size:10px;color:var(--gold);min-width:52px;text-align:right}
+.slbl{font-family:'Unbounded',sans-serif;font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);padding:28px 48px 12px;display:flex;align-items:center;gap:12px}
+.slbl::after{content:'';flex:1;height:1px;background:var(--border)}
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 20px;font-size:12px;color:var(--text);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1);z-index:500;white-space:nowrap;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.mbg{position:fixed;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(6px);z-index:300;display:none;align-items:center;justify-content:center;padding:20px}
+.mbg.on{display:flex}
+.mbox{background:var(--bg2);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:34px;max-width:540px;width:100%;max-height:88vh;overflow-y:auto;position:relative;animation:pop .2s cubic-bezier(.34,1.56,.64,1)}
+@keyframes pop{from{opacity:0;transform:scale(.94) translateY(12px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.mcl{position:sticky;top:0;float:right;background:rgba(255,255,255,.07);border:1px solid var(--border);border-radius:50%;color:var(--muted);font-size:13px;cursor:pointer;width:28px;height:28px;display:flex;align-items:center;justify-content:center;transition:all .15s;margin-bottom:10px}
+.mcl:hover{background:rgba(255,255,255,.14);color:var(--text)}
+.msport{font-family:'Unbounded',sans-serif;font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;margin-bottom:4px}
+.mname{font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:900;text-transform:uppercase;line-height:1;margin-bottom:4px}
+.mmeta{font-size:11px;color:var(--muted);margin-bottom:16px;line-height:1.5}
+.mdiv{border:none;border-top:1px solid var(--border);margin:14px 0}
+.msec{font-family:'Unbounded',sans-serif;font-size:8px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;margin-top:14px}
+.mtheme{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;text-transform:uppercase;margin-bottom:9px}
+.mbody-t{font-size:11px;color:#b0bfd0;line-height:1.75}
+.mtags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.mtag{background:rgba(245,200,66,.1);border:1px solid rgba(245,200,66,.22);color:var(--gold);font-size:9px;font-family:'Unbounded',sans-serif;padding:3px 9px;border-radius:4px}
+.mcopy{display:flex;flex-direction:column;gap:7px;margin-top:10px}
+.mci{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:6px;padding:10px 12px}
+.mci-l{font-size:8px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.mci-t{font-size:11px;color:var(--text);line-height:1.55;font-style:italic}
+.mrev{margin-top:12px;padding:12px 16px;background:rgba(245,200,66,.08);border:1px solid rgba(245,200,66,.2);border-radius:8px;display:flex;justify-content:space-between;align-items:center}
+.mrev-l{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.mrev-v{font-family:'Unbounded',sans-serif;font-size:17px;font-weight:900;color:var(--gold)}
+.m-status-row{margin-top:14px;display:flex;align-items:center;gap:12px;padding:14px 16px;border:1px solid var(--border);border-radius:8px;background:rgba(255,255,255,.02)}
+.m-status-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);flex:1}
+.m-status-btn{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:8px 18px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s}
+.m-status-btn.inactive{border-color:rgba(239,68,68,.3);color:rgba(239,68,68,.7)}
+.m-status-btn.inactive:hover{background:rgba(239,68,68,.1);color:#ef4444}
+.m-status-btn.active-btn{border-color:rgba(34,197,94,.4);color:var(--green);background:rgba(34,197,94,.1)}
+.m-status-badge{font-family:'Unbounded',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:4px}
+.m-status-badge.activated{background:rgba(34,197,94,.15);color:var(--green)}
+.m-status-badge.not-activated{background:rgba(255,255,255,.07);color:var(--muted)}
+.conn-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;flex-shrink:0;transition:background .4s}
+.conn-dot.connecting{background:#f5c842;animation:pulse-dot 1.2s infinite}
+.conn-dot.connected{background:#22c55e}
+.conn-dot.error{background:#ef4444}
+.conn-label{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.conn-wrap{display:flex;align-items:center;padding:10px 48px;gap:6px}
+@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.3}}
+@media(max-width:900px){
+  .lanes{grid-template-columns:1fr;padding:16px 20px 48px}
+  .lane+.lane{margin-left:0;margin-top:12px}
+  .days{grid-template-columns:repeat(2,1fr)}
+  .hdr,.nav,.slbl,.cal-ctrl,.cal-body,.rev-tiles,.rev-bars,.roster-controls,.conn-wrap{padding-left:20px;padding-right:20px}
+}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <div class="hdr-row">
+    <div>
+      <div class="brand">Campus Ink NIL · 2026 Season Plan</div>
+      <div class="hed">100-Athlete<br><em>Activation</em><br>Calendar</div>
+    </div>
+    <div class="stat-strip">
+      <div class="stat-box"><span class="sv">$90K</span><span class="sl">Goal</span></div>
+      <div class="stat-box"><span class="sv" id="hdr-total">100</span><span class="sl">Athletes</span></div>
+      <div class="stat-box"><span class="sv green" id="hdr-activated">0</span><span class="sl">Activated</span></div>
+      <div class="stat-box"><span class="sv" id="hdr-remaining">100</span><span class="sl">Not Activated</span></div>
+      <div class="stat-box"><span class="sv">May–Jun</span><span class="sl">Window</span></div>
+    </div>
+  </div>
+</div>
+<div class="nav">
+  <button class="ntab on" onclick="showPg('roster',this)">⚡ 100 Athletes</button>
+  <button class="ntab" onclick="showPg('cal',this)">📅 Calendar</button>
+  <button class="ntab" onclick="showPg('revenue',this)">💰 Revenue</button>
+</div>
+<div class="conn-wrap">
+  <span class="conn-dot connecting" id="conn-dot"></span>
+  <span class="conn-label" id="conn-label">Connecting to Supabase…</span>
+</div>
+<div id="pg-roster" class="pg on">
+  <div class="roster-controls">
+    <input class="search-box" type="text" placeholder="Search athletes, schools, positions…" oninput="filterRoster(this.value)">
+    <div class="filter-btns">
+      <button class="fbtn all on" onclick="setSportFilter('all',this)">All</button>
+      <button class="fbtn bb" onclick="setSportFilter('bb',this)">⚾ Baseball</button>
+      <button class="fbtn sb" onclick="setSportFilter('sb',this)">🥎 Softball</button>
+      <button class="fbtn ml" onclick="setSportFilter('ml',this)">🥍 M. Lax</button>
+      <button class="fbtn wl" onclick="setSportFilter('wl',this)">🥍 W. Lax</button>
+    </div>
+    <button class="reset-btn" onclick="resetAllStatuses()">↺ Reset All</button>
+  </div>
+  <div class="lanes">
+    <div class="lane">
+      <div class="lane-hdr inactive">
+        <span class="lane-icon">○</span>
+        <span class="lane-title">Not Activated</span>
+        <span class="lane-count" id="count-inactive">100</span>
+      </div>
+      <div class="lane-body" id="lane-inactive"></div>
+    </div>
+    <div class="lane">
+      <div class="lane-hdr active">
+        <span class="lane-icon">✦</span>
+        <span class="lane-title">Activated</span>
+        <span class="lane-count" id="count-active">0</span>
+      </div>
+      <div class="lane-body" id="lane-active"></div>
+    </div>
+  </div>
+</div>
+<div id="pg-cal" class="pg">
+  <div class="cal-ctrl">
+    <div class="mtabs">
+      <button class="mtab on" onclick="showMo('may',this)">May 2026</button>
+      <button class="mtab" onclick="showMo('june',this)">June 2026</button>
+    </div>
+    <div class="legend">
+      <div class="leg"><div class="lpip" style="background:var(--bb)"></div>Baseball</div>
+      <div class="leg"><div class="lpip" style="background:var(--sb)"></div>Softball</div>
+      <div class="leg"><div class="lpip" style="background:var(--ml)"></div>Men's Lax</div>
+      <div class="leg"><div class="lpip" style="background:var(--wl)"></div>Women's Lax</div>
+      <div class="leg"><div class="lpip" style="background:var(--gold)"></div>Special Event</div>
+    </div>
+  </div>
+  <div class="cal-body" id="cal-body"></div>
+</div>
+<div id="pg-revenue" class="pg">
+  <div class="slbl">Monthly Revenue Targets</div>
+  <div class="rev-tiles">
+    <div class="rt"><div class="rt-lbl">May Target</div><div class="rt-val" style="color:var(--bb)">$42,000</div><div class="rt-sub">Season launch + postseason push.<br>~20 M–F activation days.</div></div>
+    <div class="rt"><div class="rt-lbl">June (thru CWS Final ~Jun 10)</div><div class="rt-val" style="color:var(--sb)">$48,000</div><div class="rt-sub">WCWS + Championships + CWS.<br>Same-day champion drops.</div></div>
+    <div class="rt" style="border:1px solid rgba(245,200,66,.3);background:rgba(245,200,66,.04)"><div class="rt-lbl">Total Goal</div><div class="rt-val" style="color:var(--gold)">$90,000</div><div class="rt-sub">100 athletes · ~35 activation days<br>May 4 → CWS Final ≈ June 10</div></div>
+  </div>
+  <div class="slbl">Per-Athlete Revenue Targets (Top 30)</div>
+  <div class="rev-bars" id="rev-bars"></div>
+</div>
+<div class="toast" id="toast"></div>
+<div class="mbg" id="mbg" onclick="mBgClick(event)">
+  <div class="mbox"><button class="mcl" onclick="closeMod()">✕</button><div id="mbody"></div></div>
+</div>
+<script>
+const ATHLETES=[{id:'bb01',s:'bb',n:'Roch Cholowsky',pos:'SS · UCLA',stat:'1.190 OPS · 23 HR · #1 Draft Prospect',hook:'Golden Spikes Watch campaign anchor. UCLA on 20-game win streak.'},{id:'bb02',s:'bb',n:'Justin LeBron',pos:'SS · Alabama',stat:'.316/.421/.636 · 18 HR · 17 SB',hook:'5-tool shortstop. Alabama\'s massive SEC fanbase is a built-in amplifier.'},{id:'bb03',s:'bb',n:'Drew Burress',pos:'CF · Georgia Tech',stat:'2× Golden Spikes Semifinalist · .381/25/67 FR',hook:'Human highlight reel. "5-Tool Friday" content machine.'},{id:'bb04',s:'bb',n:'Jackson Flora',pos:'RHP · UC Santa Barbara',stat:'1.00 ERA · 21 K · #1 pitcher in draft class',hook:'Mid-major ace with the draft\'s most staggering ERA. Underdog story.'},{id:'bb05',s:'bb',n:'Ryder Helfrick',pos:'C · Arkansas',stat:'.305/.420/.616 · 15 HR · 2nd-Team AA',hook:'Called "the next Kjerstad" by Dave Van Horn. Razorbacks fanbase.'},{id:'bb06',s:'bb',n:'Vahn Lackey',pos:'C · Georgia Tech',stat:'.414 AVG · .531 OBP · 1.350 OPS',hook:'ACC Midseason Player of Year. GT duo with Burress amplifies both.'},{id:'bb07',s:'bb',n:'Daniel Jackson',pos:'OF · Vanderbilt',stat:'.412 AVG · 16 HR · 14 SB',hook:'Midseason breakout. "Nobody knew his name in February" narrative.'},{id:'bb08',s:'bb',n:'Landson Hairston',pos:'INF · Midseason Star',stat:'2026 breakout sensation',hook:'Emergence story — surprises always create the best merch moments.'},{id:'bb09',s:'bb',n:'Gavin Kelly',pos:'INF · West Virginia',stat:'All-American type season · Big 12',hook:'ESPN called him "the best athlete in the Big 12." That quote sells shirts.'},{id:'bb10',s:'bb',n:'Brendan Brock',pos:'INF · Oklahoma',stat:'14 SB · All-American metrics',hook:'Speed and versatility. Big 12 standout with Oklahoma\'s huge fanbase.'},{id:'bb11',s:'bb',n:'Carson Tinney',pos:'INF · Texas',stat:'Monster season · Longhorns core',hook:'Texas fan base is the largest in college baseball. Any Longhorn sells.'},{id:'bb12',s:'bb',n:'Mason Edwards',pos:'LHP · USC',stat:'Near-untouchable · 9+ K in 6 straight starts',hook:'L.A. market. West Coast ace surprise story — nobody expected this.'},{id:'bb13',s:'bb',n:'Will Gasparino',pos:'INF · UCLA',stat:'12 HR · 1.240 OPS · Transfer star',hook:'Transfer sensation on the #1 team. Newcomer-of-the-year narrative.'},{id:'bb14',s:'bb',n:'Logan Reddemann',pos:'RHP · UCLA',stat:'7-0 · 2.72 ERA · Elite newcomer',hook:'The ace anchoring the #1 ranked team\'s dominant pitching staff.'},{id:'bb15',s:'bb',n:'Dylan Volantis',pos:'LHP · Texas',stat:'2.08 ERA · 51 K · 3-0',hook:'Freshmen SEC saves record in 2025, now dominant as a starter.'},{id:'bb16',s:'bb',n:'Ruger Riojas',pos:'RHP · Texas',stat:'1.59 ERA · 64 K',hook:'Texas 3-ace rotation anchor. SEC title contender storyline.'},{id:'bb17',s:'bb',n:'Mac Moyer',pos:'INF · Nebraska',stat:'.404 AVG',hook:'Nebraska resurgence. Two .400 hitters on the same team is a story.'},{id:'bb18',s:'bb',n:'Dylan Carey',pos:'OF · Nebraska',stat:'.403 AVG',hook:'Husker pair: Moyer + Carey — co-feature "Nebraska is Back" collection.'},{id:'bb19',s:'bb',n:'Sawyer Strosnider',pos:'OF · TCU',stat:'.350 · Big 12 Freshman of Year 2025',hook:'Sophomore leap story. TCU\'s rising star in the Big 12.'},{id:'bb20',s:'bb',n:'AJ Gracia',pos:'INF · Virginia',stat:'Top preseason prospect · ACC',hook:'Virginia rebuild under new coach Pollard. Fresh start narrative.'},{id:'bb21',s:'bb',n:'Ace Reese',pos:'3B · Mississippi State',stat:'Key portal retention',hook:'Stayed for Brian O\'Connor. Loyalty story resonates with Bulldogs fans.'},{id:'bb22',s:'bb',n:'Brady Ballinger',pos:'OF · Kansas',stat:'Preseason watchlist · Big 12',hook:'Kansas baseball rising. Overlooked fanbase with major upside.'},{id:'bb23',s:'bb',n:'Rintaro Sasaki',pos:'OF · Stanford',stat:'Walk-off bomb vs FSU',hook:'Japanese-American standout. Walk-off heroics = immediate merch hook.'},{id:'bb24',s:'bb',n:'Lorenzo Carrier',pos:'OF · Pittsburgh',stat:'Breakout after 3 seasons at Miami',hook:'3-year wait for his moment. Veteran breakthrough story is universally relatable.'},{id:'bb25',s:'bb',n:'Aidan Weaver',pos:'RHP · Duke',stat:'ACC Friday night ace',hook:'Duke baseball\'s face. Growing program with national brand.'},{id:'bb26',s:'bb',n:'Jay Dillard',pos:'INF · Clemson',stat:'ACC veteran · Redshirt junior',hook:'Clemson is one of the sport\'s biggest brands. Any Tiger sells.'},{id:'bb27',s:'bb',n:'Cameron Flukey',pos:'RHP · Coastal Carolina',stat:'6\'6 · 98 mph · Rib injury return',hook:'Comeback arc after rib injury. 98 mph on a 6\'6 frame is the story.'},{id:'bb28',s:'bb',n:'Trey Beard',pos:'RHP · Florida State',stat:'14-K no-hit bid · Transfer portal',hook:'Mid-major to FSU portal success. Earned his shot.'},{id:'bb29',s:'bb',n:'Michael Sharman',pos:'RHP · Clemson',stat:'78-pitch CG win vs South Carolina',hook:'Rivalry complete game is rare and marketable. Clemson faithful respond.'},{id:'bb30',s:'bb',n:'Kent Schmidt',pos:'INF · Georgia Tech',stat:'GT veteran backbone',hook:'Part of Georgia Tech\'s star trio alongside Burress and Lackey.'},{id:'bb31',s:'bb',n:'Roman Martin',pos:'3B · UCLA',stat:'UCLA returner',hook:'Part of the UCLA class that\'s stayed together 3+ years. Loyalty story.'},{id:'bb32',s:'bb',n:'Cashel Duggar',pos:'C · UCLA',stat:'UCLA catcher · Returning starter',hook:'Catcher on a national-championship-level run. MCWS moment incoming.'},{id:'bb33',s:'bb',n:'Payton Brennan',pos:'2B · UCLA',stat:'UCLA identity piece',hook:'Part of UCLA\'s nucleus. Group "Class of Champions" design concept.'},{id:'bb34',s:'bb',n:'Mulivai Levu',pos:'1B · UCLA',stat:'Power bat at UCLA',hook:'Polynesian heritage angle. Unique cultural story rarely told in baseball.'},{id:'bb35',s:'bb',n:'Chris Hacopian',pos:'INF · Texas A&M',stat:'Top portal addition in A&M cycle',hook:'Transfer headline. Aggie network is enormous and highly engaged.'},{id:'bb36',s:'bb',n:'Eric Guevara',pos:'INF · Auburn',stat:'Auburn anchor · SEC',hook:'Auburn\'s rapid SEC rise. Veterans of one of the sport\'s best turnarounds.'},{id:'bb37',s:'bb',n:'Benn Johnston',pos:'MID/INF · Duke',stat:'ACC veteran · Multi-sport buzz',hook:'Two-sport buzz. Duke identity brand with a national audience.'},{id:'bb38',s:'bb',n:'Jack Radel',pos:'ATT · Tufts (D3)',stat:'D3 Preseason Player of Year · Tewaaraton',hook:'Crossover D3 star. D3 excellence in a D1 world is a compelling angle.'},{id:'bb39',s:'bb',n:'Nick Locurto',pos:'OF · Virginia Tech',stat:'3-year wait → starring role',hook:'Senior who finally broke through. Universally relatable redemption story.'},{id:'bb40',s:'bb',n:'Landon Hairston',pos:'INF · 2026 Breakout',stat:'Midseason emergence',hook:'"Nobody knew his name in February" is always a great campaign hook.'},
+{id:'sb01',s:'sb',n:'NiJaree Canady',pos:'P · Texas Tech',stat:'20-3 · 1.38 ERA · 179 K · 1,000+ career K',hook:'First 7-figure softball NIL deal. 4th straight POY watchlist. Biggest name in the sport.'},{id:'sb02',s:'sb',n:'Jordy Bahl Frahm',pos:'P/1B · Nebraska',stat:'1.50 ERA · .450 AVG · 20+ HR · Fastest pitch record',hook:'"Both Sides" dual-design concept. Generational two-way player.'},{id:'sb03',s:'sb',n:'Karlyn Pickens',pos:'P · Tennessee',stat:'79.4 mph — new NCAA fastest pitch ever',hook:'"79.4" is the entire campaign. The gun number is the design.'},{id:'sb04',s:'sb',n:'Teagan Kavan',pos:'P · Texas',stat:'WCWS MVP 2025 · Senior farewell',hook:'Senior farewell collections outperform standard launches 40-60%.'},{id:'sb05',s:'sb',n:'Reese Atwood',pos:'C · Oklahoma',stat:'20+ HR · OU WCWS runs',hook:'"20-Homer Club" exclusive design. OU fans buy everything.'},{id:'sb06',s:'sb',n:'Isa Torres',pos:'SS · Florida State',stat:'.436 AVG (FSU record) · 95 hits · 1st-Team AA',hook:'Record season commemorative. ".436" is a standout design hook.'},{id:'sb07',s:'sb',n:'Mya Perez',pos:'OF · Texas A&M',stat:'Breakout 2025 · 2026 watchlist',hook:'Aggie rising star. Massive A&M alumni network ready to buy.'},{id:'sb08',s:'sb',n:'Kaitlyn Terry',pos:'2B/P · Texas Tech',stat:'USA Softball Top 25 · Two-way',hook:'Two-way player alongside Canady. TTU double-feature activation.'},{id:'sb09',s:'sb',n:'Kasidi Pickering',pos:'OF · Oklahoma',stat:'NCAA Tournament HR machine',hook:'OU championship pedigree. Clutch moments make the best merch hooks.'},{id:'sb10',s:'sb',n:'Bri Ellis',pos:'P · Arkansas',stat:'2025 USA Softball Player of the Year',hook:'Defending Player of Year. "Chip on shoulder" is the narrative.'},{id:'sb11',s:'sb',n:'Jazzy Francik',pos:'P · Florida State',stat:'1.71 ERA · 5-1 · Breakout sophomore',hook:'Only loss came to #1 Alabama. Rising star arc has long campaign life.'},{id:'sb12',s:'sb',n:'Alexis Jensen',pos:'P · UCLA',stat:'Beat UCLA — midseason giant-killer',hook:'Giant-killer narrative. Upset of #1 UCLA is immediate merch fuel.'},{id:'sb13',s:'sb',n:'Paislie Allen',pos:'OF · Texas A&M',stat:'Over-the-wall catch — viral ESPN feature',hook:'Already viral. Highlight play = immediate merch hook.'},{id:'sb14',s:'sb',n:'Sydney Stewart',pos:'C · Arizona',stat:'AUSL Draft pick · Power backstop',hook:'Pro-bound catcher. "Last college summer" framing works well.'},{id:'sb15',s:'sb',n:'Grace Lyons',pos:'P · Oregon',stat:'Oregon ace · Big Ten transfer',hook:'Oregon NIL market growing. Pacific Northwest cult following.'},{id:'sb16',s:'sb',n:'Alyssa Trammell',pos:'OF · Oklahoma',stat:'OU speed threat · All-Conference',hook:'Oklahoma depth chart star. OU fans buy everything on the roster.'},{id:'sb17',s:'sb',n:'Hannah Cady',pos:'P · Florida',stat:'SEC veteran · Gators contender',hook:'Florida program revival. Gators are always a major national brand.'},{id:'sb18',s:'sb',n:'Stormi Koetter',pos:'INF · LSU',stat:'LSU anchor · SEC powerhouse',hook:'LSU softball is one of the sport\'s biggest brand names.'},{id:'sb19',s:'sb',n:'Katie Flannery',pos:'P · UCLA',stat:'UCLA pitcher · Contender',hook:'UCLA national title run — any Bruin is highly marketable in 2026.'},{id:'sb20',s:'sb',n:'Kinzie Hansen',pos:'C · Oklahoma',stat:'OU backstop',hook:'Catching duo alongside Atwood. OU depth makes for unique ensemble play.'},{id:'sb21',s:'sb',n:'Jocelyn Erickson',pos:'OF · Oregon',stat:'Oregon outfielder',hook:'Oregon\'s Pacific Northwest cult following is an underserved market.'},{id:'sb22',s:'sb',n:'Jayda Coleman',pos:'OF · Oklahoma',stat:'OU speed and power',hook:'Oklahoma offensive depth on a championship contender.'},{id:'sb23',s:'sb',n:'Hope Trautwein',pos:'P · North Texas',stat:'27-strikeout perfect game (record)',hook:'The 27-K perfect game record is permanent history. Evergreen design.'},{id:'sb24',s:'sb',n:'Keely Peltier',pos:'OF · Florida State',stat:'FSU veteran · ACC',hook:'FSU softball supporting cast alongside Torres.'},{id:'sb25',s:'sb',n:'Hailey Decker',pos:'INF · Texas',stat:'Texas depth · Longhorns contender',hook:'Texas fan base is the largest in softball. Any Longhorn sells.'},{id:'sb26',s:'sb',n:'Jade Owens',pos:'OF · Arkansas',stat:'Arkansas contender · SEC',hook:'Arkansas following the 2025 Player of Year\'s championship footsteps.'},{id:'sb27',s:'sb',n:'Aliyah Andrews',pos:'OF · LSU',stat:'LSU speed threat',hook:'Fast-twitch LSU outfielder. Highlight content machine.'},{id:'sb28',s:'sb',n:'Jessie Scroggins',pos:'INF · UCLA',stat:'UCLA core · Title contender',hook:'UCLA depth on a #1 team with a national championship in sight.'},{id:'sb29',s:'sb',n:'Taryn Kern',pos:'P · Arizona',stat:'Arizona ace · Top 25 program',hook:'Arizona program ascent. Bear Down fanbase growing rapidly.'},{id:'sb30',s:'sb',n:'Kelsey Osorio',pos:'INF · Texas',stat:'Texas core piece',hook:'Sisters on the same team (with Kayla). Unique family brand angle.'},
+{id:'ml01',s:'ml',n:'Joey Spallina',pos:'ATT · Syracuse',stat:'35 G · 55 A · 62 pts from all-time record',hook:'Record countdown = built-in content series. Tewaaraton contender.'},{id:'ml02',s:'ml',n:'Caleb "Big Tasty" Fyock',pos:'GK · Ohio State',stat:'.612 Save % · 10 straight double-digit saves',hook:'"Big Tasty" is the best athlete brand name in any sport right now.'},{id:'ml03',s:'ml',n:'Owen Duffy',pos:'ATT · North Carolina',stat:'Tewaaraton Final 25 · UNC title run',hook:'Tewaaraton finalist on a potential champion.'},{id:'ml04',s:'ml',n:'Ryan Goldstein',pos:'ATT · Cornell',stat:'Tewaaraton Final 25 · Ivy standout',hook:'Cornell Ivy brand is unique and collector-worthy.'},{id:'ml05',s:'ml',n:'Chad Palumbo',pos:'ATT · Princeton',stat:'Tewaaraton Final 25 · PLL Draft bound',hook:'Pro-draft bound senior. "Last college game" farewell narrative.'},{id:'ml06',s:'ml',n:'Willem Firth',pos:'ATT · Cornell',stat:'Tewaaraton Final 25 · Junior',hook:'Cornell duo with Goldstein. Ivy brand collection concept.'},{id:'ml07',s:'ml',n:'Benn Johnston',pos:'MID · Duke',stat:'Tewaaraton Final 25 · ACC',hook:'Duke lacrosse revival. National brand with a growing fan base.'},{id:'ml08',s:'ml',n:'Aidan Maguire',pos:'SSDM · Duke',stat:'McLaughlin Award winner',hook:'Best two-way midfielder. SSDM is a unique design angle nobody does.'},{id:'ml09',s:'ml',n:'Matt Collison',pos:'MID · Johns Hopkins',stat:'PLL Draft contender · Tewaaraton Final 25',hook:'Hopkins is the most storied program in lacrosse. Blue-chip brand.'},{id:'ml10',s:'ml',n:'Shawn Lyght',pos:'DEF · Notre Dame',stat:'Tewaaraton Final 25 · Notre Dame',hook:'Notre Dame lacrosse is growing with a massive global alumni base.'},{id:'ml11',s:'ml',n:'McCabe Millon',pos:'ATT · Virginia',stat:'27 A · 50 pts · UVA lead scorer',hook:'Virginia lacrosse pedigree. "The Program" for UVA fans.'},{id:'ml12',s:'ml',n:'Evan Plunkett',pos:'MID · Army',stat:'Tewaaraton Final 25 · Military',hook:'Army military tribute narrative. Cross-demographic appeal.'},{id:'ml13',s:'ml',n:'Dominic Pietramala',pos:'ATT · North Carolina',stat:'Tewaaraton Final 25 · UNC depth',hook:'Son of legendary Johns Hopkins coach. Legacy angle is compelling.'},{id:'ml14',s:'ml',n:'Nate Kabiri',pos:'ATT · Princeton',stat:'Tewaaraton Final 25 · Princeton',hook:'Princeton power trio. Collectors buy program sets.'},{id:'ml15',s:'ml',n:'Mikey Weisshaar',pos:'ATT · Towson',stat:'48 G · CAA POY · Tewaaraton nominee',hook:'Mid-major dominance. First Towson Tewaaraton nominee since 2019.'},
+{id:'wl01',s:'wl',n:'Chloe Humphrey',pos:'ATT · North Carolina',stat:'2025 Tewaaraton winner · 2026 Preseason POY',hook:'"The Phenom" sophomore chapter. Biggest name in women\'s lacrosse.'},{id:'wl02',s:'wl',n:'Shea Dolce',pos:'GK · Boston College',stat:'.549 Save % · 2× ACC GK of Year · World Games gold',hook:'First-ever BC goalie merch line. Position-forward campaign nobody else is running.'},{id:'wl03',s:'wl',n:'Madison Taylor',pos:'MID · Northwestern',stat:'2024 & 2025 Tewaaraton Finalist · Grad student',hook:'Two-time finalist going for the title in her final year.'},{id:'wl04',s:'wl',n:'Sam Forrest',pos:'DEF · North Carolina',stat:'IWLCA Defender of Year · Pan-Am gold',hook:'First defender-centric NIL collection in women\'s lacrosse history.'},{id:'wl05',s:'wl',n:'Kate Galica',pos:'MID · Virginia',stat:'IWLCA 1st-Team AA · ACC MoY · Draw control record',hook:'Virginia record-holder. Draw controls are a standout design anchor.'},{id:'wl06',s:'wl',n:'Madison Alaimo',pos:'ATT · Virginia',stat:'IWLCA 3rd-Team AA · Team points leader',hook:'Virginia attacking duo with Galica. UVA collection concept.'},{id:'wl07',s:'wl',n:'Kori Edmondson',pos:'MID · Maryland',stat:'Maryland senior · Big Ten',hook:'Maryland women\'s lax is always in the championship picture.'},{id:'wl08',s:'wl',n:'Brigid Duffy',pos:'MID · Army',stat:'Army record-holder · Two-sport athlete',hook:'Cross-promote with men\'s Army lax (Plunkett). "Army Season" dual campaign.'},{id:'wl09',s:'wl',n:'Isabella Caporuscio',pos:'MID · Stony Brook',stat:'49 G · 68 pts · CAA POY',hook:'Stony Brook 6 straight years with a Tewaaraton nominee. Mid-major story.'},{id:'wl10',s:'wl',n:'Nikki Mennella',pos:'ATT · Hofstra',stat:'99 pts · 62 G · 6.60 pts/game CAA record',hook:'Mid-major point machine. CAA record is a permanent design hook.'},{id:'wl11',s:'wl',n:'Jenika Cuocco',pos:'GK · Northwestern',stat:'Tewaaraton Watch · Northwestern final year',hook:'Northwestern women\'s lax in the title picture. Grad student farewell.'},{id:'wl12',s:'wl',n:'Ava Class',pos:'MID · Michigan',stat:'Michigan grad student · Big Ten standout',hook:'Michigan\'s growing lacrosse brand. Midwest fan base is underserved.'},{id:'wl13',s:'wl',n:'Kayla Gilmore',pos:'MID · Maryland',stat:'Maryland sophomore · Rising star',hook:'Maryland\'s next-wave player. Future of the program arc.'},{id:'wl14',s:'wl',n:'Haven Dora',pos:'ATT · Princeton',stat:'Princeton attacker · Tewaaraton watch',hook:'Ivy League lacrosse. Princeton brand is collector-grade.'},{id:'wl15',s:'wl',n:'Orly Sedransk',pos:'GK · Penn',stat:'.490 Save % · Ivy GK of Year · Tewaaraton watch',hook:'Penn Ivy goalkeeper. Rare position star with a unique campus brand.'}];
+
+const SPORT_COLORS={bb:'#ef4444',sb:'#f472b6',ml:'#3b82f6',wl:'#a855f7'};
+const SPORT_LABELS={bb:'College Baseball',sb:'College Softball',ml:"Men's Lacrosse",wl:"Women's Lacrosse"};
+const SPORT_NAMES={bb:'Baseball',sb:'Softball',ml:'M. Lacrosse',wl:'W. Lacrosse'};
+const SUPA_URL='https://wxiqdvaogcczvrjbatnx.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4aXFkdmFvZ2NjenZyamJhdG54Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0OTAxNDcsImV4cCI6MjA5MzA2NjE0N30.dWGzwvCNa5f9XuKiUf4HLG_WtZN47y6F5e0zVO1nz-s';
+const supa=supabase.createClient(SUPA_URL,SUPA_KEY);
+function setConnStatus(s){const d=document.getElementById('conn-dot'),l=document.getElementById('conn-label');d.className='conn-dot '+s;l.textContent={connecting:'Connecting to Supabase…',connected:'Live — changes sync across your team instantly',error:'Connection error — retrying…'}[s]||s}
+let statuses={},sportFilter='all',searchQuery='',modalAthleteId=null,pendingToggles=new Set();
+async function loadStatuses(){setConnStatus('connecting');try{const{data,error}=await supa.from('athlete_statuses').select('id,status');if(error)throw error;statuses={};(data||[]).forEach(r=>{if(r.status==='activated')statuses[r.id]='activated'});setConnStatus('connected')}catch(e){console.error(e);setConnStatus('error');setTimeout(loadStatuses,4000)}}
+function subscribeToChanges(){supa.channel('athlete_statuses_changes').on('postgres_changes',{event:'*',schema:'public',table:'athlete_statuses'},p=>{const{eventType,new:n,old:o}=p;if(eventType==='INSERT'||eventType==='UPDATE'){if(n.status==='activated')statuses[n.id]='activated';else delete statuses[n.id]}else if(eventType==='DELETE')delete statuses[o.id];renderRoster();updateHeaderCounts();if(modalAthleteId&&(n?.id===modalAthleteId||o?.id===modalAthleteId))refreshModalStatus(modalAthleteId)}).subscribe(s=>{if(s==='SUBSCRIBED')setConnStatus('connected');else if(s==='CHANNEL_ERROR'||s==='TIMED_OUT')setConnStatus('error')})}
+function isActivated(id){return statuses[id]==='activated'}
+async function toggleStatus(id){if(pendingToggles.has(id))return;pendingToggles.add(id);const was=isActivated(id);if(was)delete statuses[id];else statuses[id]='activated';renderRoster();updateHeaderCounts();if(modalAthleteId===id)refreshModalStatus(id);const a=ATHLETES.find(x=>x.id===id);showToast(isActivated(id)?`✦ ${a.n} activated`:`○ ${a.n} moved to Not Activated`);try{const ns=isActivated(id)?'activated':'not_activated';const{error}=await supa.from('athlete_statuses').upsert({id,status:ns,updated_at:new Date().toISOString()},{onConflict:'id'});if(error)throw error}catch(e){console.error(e);if(was)statuses[id]='activated';else delete statuses[id];renderRoster();updateHeaderCounts();if(modalAthleteId===id)refreshModalStatus(id);showToast('⚠ Save failed — check connection')}finally{pendingToggles.delete(id)}}
+async function resetAllStatuses(){if(!confirm('Reset ALL athletes to Not Activated for the whole team?'))return;statuses={};renderRoster();updateHeaderCounts();showToast('↺ Resetting all athletes…');try{const{error}=await supa.from('athlete_statuses').update({status:'not_activated',updated_at:new Date().toISOString()}).neq('status','not_activated');if(error)throw error;showToast('↺ All athletes reset to Not Activated')}catch(e){console.error(e);showToast('⚠ Reset failed — check connection');await loadStatuses();renderRoster();updateHeaderCounts()}}
+function updateHeaderCounts(){const t=ATHLETES.length,a=ATHLETES.filter(x=>isActivated(x.id)).length;document.getElementById('hdr-total').textContent=t;document.getElementById('hdr-activated').textContent=a;document.getElementById('hdr-remaining').textContent=t-a}
+function setSportFilter(s,btn){sportFilter=s;document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderRoster()}
+function filterRoster(q){searchQuery=q.toLowerCase().trim();renderRoster()}
+function athleteMatchesFilter(a){if(sportFilter!=='all'&&a.s!==sportFilter)return false;if(searchQuery){const h=(a.n+a.pos+a.stat+a.hook).toLowerCase();if(!h.includes(searchQuery))return false}return true}
+function renderRoster(){const il=document.getElementById('lane-inactive'),al=document.getElementById('lane-active');const ia=ATHLETES.filter(a=>!isActivated(a.id)&&athleteMatchesFilter(a)),ac=ATHLETES.filter(a=>isActivated(a.id)&&athleteMatchesFilter(a));document.getElementById('count-inactive').textContent=ATHLETES.filter(a=>!isActivated(a.id)).length;document.getElementById('count-active').textContent=ATHLETES.filter(a=>isActivated(a.id)).length;il.innerHTML=ia.length===0?'<div class="lane-empty">No athletes match the current filter.</div>':renderAthleteGroups(ia,false);al.innerHTML=ac.length===0?'<div class="lane-empty">No activated athletes yet. Click ✦ on any athlete to activate.</div>':renderAthleteGroups(ac,true)}
+function renderAthleteGroups(athletes,activated){const order=['bb','sb','ml','wl'];let html='';order.forEach(s=>{const g=athletes.filter(a=>a.s===s);if(!g.length)return;html+=`<div class="sport-divider" style="color:${SPORT_COLORS[s]}">${SPORT_NAMES[s]} <span style="color:var(--muted);font-size:8px">${g.length}</span></div>`;g.forEach(a=>{html+=renderAthleteCard(a,activated)})});return html}
+function renderAthleteCard(a,activated){const sc=SPORT_COLORS[a.s],ti=activated?'✕':'✦',tt=activated?'Move to Not Activated':'Activate';return`<div class="ac ${a.s}${activated?' activated':''}" onclick="openAthleteModal('${a.id}')" title="Click to view details"><div class="ac-sport-pip" style="background:${sc}"></div><div class="ac-info"><div class="ac-name">${a.n}</div><div class="ac-sub">${a.pos}</div><div class="ac-stat">${a.stat}</div></div><div class="ac-toggle${activated?' activated':''}" title="${tt}" onclick="event.stopPropagation();toggleStatus('${a.id}')">${ti}</div></div>`}
+function openAthleteModal(id){modalAthleteId=id;const a=ATHLETES.find(x=>x.id===id);document.getElementById('mbody').innerHTML=buildAthleteModalHTML(a,SPORT_COLORS[a.s]);document.getElementById('mbg').classList.add('on')}
+function buildAthleteModalHTML(a,sc){const act=isActivated(a.id),bc=act?'inactive':'active-btn',bl=act?'○ Move to Not Activated':'✦ Activate',bdc=act?'activated':'not-activated',bdl=act?'ACTIVATED':'NOT ACTIVATED';return`<div class="msport" style="color:${sc}">${SPORT_LABELS[a.s]}</div><div class="mname">${a.n}</div><div class="mmeta">${a.pos}</div><hr class="mdiv"><div class="msec">2026 Stats & Profile</div><div class="mbody-t">${a.stat}</div><div class="msec">NIL Activation Angle</div><div class="mbody-t">${a.hook}</div><div class="m-status-row"><div><div class="m-status-label">Current Status</div><div style="margin-top:4px"><span class="m-status-badge ${bdc}">${bdl}</span></div></div><button class="m-status-btn ${bc}" onclick="toggleStatus('${a.id}')">${bl}</button></div>`}
+function refreshModalStatus(id){const a=ATHLETES.find(x=>x.id===id);if(document.getElementById('mbody'))document.getElementById('mbody').innerHTML=buildAthleteModalHTML(a,SPORT_COLORS[a.s])}
+const CAL={may:[{label:'WEEK 1 · May 4–8 · Season Launch',days:[{day:'Mon',date:'5/4',sport:'bb',ath:'Roch Cholowsky',theme:'"Golden Spikes Watch" campaign launch',merch:'Signed jersey (100 units) + Gold Spikes tee',rev:'$3,200'},{day:'Tue',date:'5/5',sport:'sb',ath:'NiJaree Canady',theme:'"Ace of the Decade" hoodie pre-order opens',merch:'Signature hoodie + photo print series',rev:'$4,100'},{day:'Wed',date:'5/6',sport:'ml',ath:'Joey Spallina',theme:'"Spallina\'s Record Run" graphic tee + countdown',merch:'Countdown tee + decal pack',rev:'$2,600'},{day:'Thu',date:'5/7',sport:'wl',ath:'Chloe Humphrey',theme:'"The Phenom Returns" sophomore collection',merch:'Crewneck + Tewaaraton tribute tee',rev:'$3,500'},{day:'Fri',date:'5/8',sport:'multi',ath:'Flash Friday — Week 1',theme:'Buy 2, free ship · All-sport cross-sell',merch:'Any 2 launch items = free shipping',rev:'$2,800',social:'"FLASH FRIDAY ⚡ Buy any 2 items from this week\'s launches = free shipping. Baseball. Softball. Lacrosse. Mix and match. 24 hours only."',email:'"⚡ 24 hours. Buy 2, ship free. All sports."'}]},{label:'WEEK 2 · May 11–15 · Midseason Stars',days:[{day:'Mon',date:'5/11',sport:'bb',ath:'Justin LeBron',theme:'"LeBron Season" hat drop — power + speed story',merch:'Hat + wristband set',rev:'$2,400'},{day:'Tue',date:'5/12',sport:'sb',ath:'Jordy Bahl Frahm',theme:'"Both Sides" dual-design tee — pitcher + slugger',merch:'Dual-design tee + career poster',rev:'$2,900'},{day:'Wed',date:'5/13',sport:'bb',ath:'Vahn Lackey',theme:'"Lackey Locks In" — ACC\'s hottest catcher',merch:'ACC POY candidate tee + stats print',rev:'$2,100'},{day:'Thu',date:'5/14',sport:'wl',ath:'Shea Dolce',theme:'"Dolce Defense" — first BC goalie merch line',merch:'Limited goalie tee + save % poster',rev:'$2,100'},{day:'Fri',date:'5/15',sport:'bb',ath:'Drew Burress',theme:'"5-Tool Friday" — Golden Spikes dark horse',merch:'Action poster + hat',rev:'$2,200',social:'"5-Tool Friday ⚡ Drew Burress: .381 as a freshman. Two Golden Spikes nominations. He does everything. Collection drops today."',email:'"The most electric player in college baseball. Drew Burress drops today."'}]},{label:'WEEK 3 · May 18–22 · Speed Record Week',days:[{day:'Mon',date:'5/18',sport:'sb',ath:'Karlyn Pickens',theme:'"79.4 mph" — speed record is the entire campaign',merch:'"79.4" stat tee + Tennessee orange hoodie',rev:'$3,400'},{day:'Tue',date:'5/19',sport:'ml',ath:'Caleb "Big Tasty" Fyock',theme:'Lean into the brand — playful goalie merch',merch:'"Big Tasty" tee + bobblehead (limited)',rev:'$2,400'},{day:'Wed',date:'5/20',sport:'sb',ath:'Teagan Kavan',theme:'"Kavan\'s Kingdom" senior farewell — WCWS hype',merch:'Farewell hoodie + WCWS MVP tribute',rev:'$3,100'},{day:'Thu',date:'5/21',sport:'bb',ath:'Daniel Jackson',theme:'Midseason breakout — "Nobody saw this coming"',merch:'.412 AVG stat tee + Vanderbilt design',rev:'$2,200'},{day:'Fri',date:'5/22',sport:'special',ath:'Tournament Preview Drop',theme:'"Who\'s Your Champion?" fan vote + bracket bundle',merch:'All-athlete championship bundle',rev:'$3,600',social:'"WHO TAKES HOME THE TITLE? 🏆 Vote for your champion — the most-voted athlete\'s gear drops to all-time low price when results come in."',email:'"The brackets are set. 4 sports. 100 athletes. Who\'s YOUR champion? Vote + shop."'}]},{label:'WEEK 4 · May 26–30 · Tournament Eve Surge',days:[{day:'Tue',date:'5/26',sport:'wl',ath:'Madison Taylor',theme:'"Third Time\'s the Tewaaraton" — grad student final run',merch:'2× finalist farewell crewneck',rev:'$2,800'},{day:'Wed',date:'5/27',sport:'sb',ath:'Reese Atwood',theme:'"20-Homer Club" exclusive — OU championship tie',merch:'Exclusive club tee + OU design',rev:'$2,500'},{day:'Thu',date:'5/28',sport:'ml',ath:'Owen Duffy',theme:'UNC attack — championship contender spotlight',merch:'UNC lax tee + Tewaaraton countdown',rev:'$1,900'},{day:'Fri',date:'5/29',sport:'bb',ath:'Ryder Helfrick',theme:'"Called It" — catcher + Van Horn quote anchor',merch:'Catcher set + signed photo (75 units)',rev:'$2,000'},{day:'Fri',date:'5/30',sport:'special',ath:'WCWS Eve Drop',theme:'48-hr window before WCWS opens',merch:'All softball athletes bundle · Pre-order champ tee',rev:'$4,200',social:'"WCWS opens in 48 hours. Your favorite pitcher is already on a plane to Oklahoma City. Get their gear now."',email:'"The WCWS starts in 2 days. Shop your pitcher now."'}]}],june:[{label:'WEEK 1 · June 1–5 · WCWS Opens + Lacrosse Championships',days:[{day:'Mon',date:'6/1',sport:'sb',ath:'Canady — WCWS Day 1',theme:'Win-reactive drop — "If TT wins, gear ships free"',merch:'WCWS champ tee pre-order',rev:'$4,800'},{day:'Tue',date:'6/2',sport:'ml',ath:'Spallina — Final Four',theme:'"Spallina\'s Last Stand" Memorial Day weekend ed.',merch:'Final Four limited tee',rev:'$3,200'},{day:'Wed',date:'6/3',sport:'wl',ath:'Humphrey — Title Defense',theme:'"Can She Do It Again?" + Tewaaraton tie-in',merch:'Championship collection + Tewaaraton tribute',rev:'$4,200'},{day:'Thu',date:'6/4',sport:'sb',ath:'Bahl Frahm — WCWS',theme:'Two-way star in biggest moments — Nebraska run',merch:'Nebraska WCWS run collection',rev:'$3,100'},{day:'Fri',date:'6/5',sport:'special',ath:'Same-Day Champion Drop',theme:'"Already in Production" — fastest NIL champion drop',merch:'Same-day winner gear · Ships in 24 hrs',rev:'$6,500',social:'"CHAMPION ⚡ Collection is already live. Same-day shipping. Be the first fan wearing it."',email:'"⚡ They just won. We\'re already shipping. Click now."'}]},{label:'WEEK 2 · June 8–10 · CWS Opens → Campaign Close',days:[{day:'Mon',date:'6/8',sport:'bb',ath:'Cholowsky — Road to Omaha',theme:'CWS opens — live score-reactive commerce',merch:'"Road to Omaha" collection + Omaha hat',rev:'$5,500'},{day:'Tue',date:'6/9',sport:'sb',ath:'Isa Torres — Record Season',theme:'"Torres Record Season" final commemorative',merch:'.436 AVG commemorative + FSU design',rev:'$2,600'},{day:'Wed',date:'6/10',sport:'special',ath:'⚡ CWS FINAL — CAMPAIGN CLOSE',theme:'"Champion Collection" — same-day drops all sports',merch:'All-sport champion collection · Season wrap',rev:'$7,000+',social:'"THIS IS IT. The CWS Final. Same-day champion gear across all 4 sports. ⚡🏆"',email:'"⚡ CWS FINAL. Same-day champion drops. All 4 sports. Right now."'}]}]};
+function buildCal(){const body=document.getElementById('cal-body');const lbl={bb:'Baseball',sb:'Softball',ml:'M. Lacrosse',wl:'W. Lacrosse',multi:'All Sports',special:'⚡ Special'};function rw(weeks){return weeks.map(wk=>{const days=wk.days.map(d=>{const cl=d.social||d.email;return`<div class="dc ${d.sport}${cl?' clickable':''}"${cl?` onclick="openDayModal(${JSON.stringify(d).replace(/"/g,'&quot;')})"`:''}>  <div class="dc-top"><span class="dc-day">${d.day}</span><span class="dc-date">${d.date}</span></div><div class="dc-tag ${d.sport}">${lbl[d.sport]||d.sport}</div><div class="dc-ath">${d.ath}</div><div class="dc-theme">${d.theme}</div><div class="dc-merch">↗ ${d.merch}</div><div class="dc-rev">Target: ${d.rev}</div></div>`}).join('');return`<div class="wk"><div class="wk-lbl">${wk.label}</div><div class="days">${days}</div></div>`}).join('')}body.innerHTML=`<div id="cal-may" class="mpanel on">${rw(CAL.may)}</div><div id="cal-june" class="mpanel">${rw(CAL.june)}</div>`}
+buildCal();
+function openDayModal(d){const sc={bb:'#ef4444',sb:'#f472b6',ml:'#3b82f6',wl:'#a855f7',special:'#f5c842',multi:'#f5c842'}[d.sport]||'#f5c842';const lb={bb:'College Baseball',sb:'College Softball',ml:"Men's Lacrosse",wl:"Women's Lacrosse",special:'Special Event',multi:'All Sports'}[d.sport]||d.sport;const copy=(d.social||d.email)?`<hr class="mdiv"><div class="mcopy">${d.social?`<div class="mci"><div class="mci-l">Social Post Copy</div><div class="mci-t">${d.social}</div></div>`:''} ${d.email?`<div class="mci"><div class="mci-l">Email Subject Line</div><div class="mci-t">${d.email}</div></div>`:''}</div>`:'';modalAthleteId=null;document.getElementById('mbody').innerHTML=`<div class="msport" style="color:${sc}">${lb} · ${d.day}, ${d.date}</div><div class="mname">${d.ath}</div><hr class="mdiv"><div class="mtheme">${d.theme}</div><div class="msec">Merchandise Line</div><div class="mtags">${d.merch.split(' + ').map(m=>`<span class="mtag">${m.replace('↗ ','')}</span>`).join('')}</div>${copy}<div class="mrev"><div class="mrev-l">Day Revenue Target</div><div class="mrev-v">${d.rev}</div></div>`;document.getElementById('mbg').classList.add('on')}
+const REV_DATA=[{n:'Roch Cholowsky',s:'bb',v:8200},{n:'NiJaree Canady',s:'sb',v:7400},{n:'Chloe Humphrey',s:'wl',v:6800},{n:'Karlyn Pickens',s:'sb',v:5800},{n:'Joey Spallina',s:'ml',v:5600},{n:'Justin LeBron',s:'bb',v:5200},{n:'Teagan Kavan',s:'sb',v:5000},{n:'Jordy Bahl Frahm',s:'sb',v:4800},{n:'Drew Burress',s:'bb',v:4600},{n:'Caleb Fyock',s:'ml',v:4400},{n:'Jackson Flora',s:'bb',v:3800},{n:'Reese Atwood',s:'sb',v:3600},{n:'Shea Dolce',s:'wl',v:3400},{n:'Vahn Lackey',s:'bb',v:3300},{n:'Daniel Jackson',s:'bb',v:3200},{n:'Madison Taylor',s:'wl',v:3100},{n:'Ryder Helfrick',s:'bb',v:3100},{n:'Isa Torres',s:'sb',v:2800},{n:'Sam Forrest',s:'wl',v:2800},{n:'Owen Duffy',s:'ml',v:2700},{n:'Chad Palumbo',s:'ml',v:2600},{n:'Ryan Goldstein',s:'ml',v:2500},{n:'Dylan Volantis',s:'bb',v:2400},{n:'Kate Galica',s:'wl',v:2400},{n:'Mason Edwards',s:'bb',v:2300},{n:'Bri Ellis',s:'sb',v:2200},{n:'Matt Collison',s:'ml',v:2200},{n:'Kaitlyn Terry',s:'sb',v:2100},{n:'Brigid Duffy',s:'wl',v:2100},{n:'Mya Perez',s:'sb',v:2000}];
+function renderRevBars(){const c=document.getElementById('rev-bars');if(c.dataset.r)return;c.dataset.r=1;c.innerHTML=REV_DATA.map(a=>`<div class="arw"><div class="arn"><div class="arn-pip" style="background:${SPORT_COLORS[a.s]}"></div>${a.n}</div><div class="arb-wrap"><div class="arb" style="width:0%;background:${SPORT_COLORS[a.s]}" data-p="${(a.v/8200*100).toFixed(1)}"></div></div><div class="arv">$${a.v.toLocaleString()}</div></div>`).join('');setTimeout(()=>{c.querySelectorAll('.arb').forEach(b=>{b.style.width=b.dataset.p+'%'})},100)}
+function showPg(id,btn){document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('on'));document.getElementById('pg-'+id).classList.add('on');btn.classList.add('on');if(id==='revenue')renderRevBars()}
+function showMo(id,btn){document.querySelectorAll('.mpanel').forEach(p=>p.classList.remove('on'));document.querySelectorAll('.mtab').forEach(t=>t.classList.remove('on'));document.getElementById('cal-'+id).classList.add('on');btn.classList.add('on')}
+function closeMod(){document.getElementById('mbg').classList.remove('on');modalAthleteId=null}
+function mBgClick(e){if(e.target.id==='mbg')closeMod()}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMod()});
+let toastTimer;
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2400)}
+(async()=>{await loadStatuses();subscribeToChanges();renderRoster();updateHeaderCounts()})();
+</script>
+</body>
+</html>
